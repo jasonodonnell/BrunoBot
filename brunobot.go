@@ -134,8 +134,8 @@ func main() {
             
             // Prevent multiple notifications by checking time difference
             startTime, _ := strconv.Atoi(match.StarttimeUnix)
-            delta := int32(time.Now().Unix()) - int32(startTime)
-            if send && delta <= 60 {
+            delta := time.Now().Unix() - int64(startTime)
+            if send && delta <= 61 {
                 // Link points to stream but the stats page is nicer, so replace
                 // with the stats URL instead
                 url := strings.Replace(match.Link, "match", "stats", 1)
