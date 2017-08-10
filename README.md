@@ -10,7 +10,7 @@ Built using: `Go 1.7.5`
 To install this package, assuming [$GOPATH is setup](https://golang.org/doc/install), golang is installed and working, run:
 
 ```bash
-$ go get github.com/jasonodonnell/brunobot
+$ go install github.com/jasonodonnell/brunobot
 ```
 
 ## Setup
