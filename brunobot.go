@@ -86,23 +86,25 @@ func whitelisted(team1 string, team2 string, whitelist []string) bool {
 }
 
 // Webhook must be set in configuration
-func loadConfiguration(path string, config *configuration) {
+func parseConfiguration(path string) (config configuration, err error) {
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Println("Configuration file not found.. exiting")
-		usage()
+		return
 	}
-	decoder := json.NewDecoder(file)
+	defer file.Close()
 
-	err = decoder.Decode(config)
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	if config.Webhook == "" {
-		fmt.Println("Webhook is not set.. exiting")
-		usage()
+		err = fmt.Errorf("Webhook is not set")
+		return
 	}
+
+	return
 }
 
 func main() {
@@ -112,8 +114,13 @@ func main() {
 		fmt.Println("Configuration file not found.. exiting")
 		usage()
 	}
-	configuration := &configuration{}
-	loadConfiguration(*configFile, configuration)
+
+	// parse configuration
+	configuration, err := parseConfiguration(*configFile)
+	if err != nil {
+		fmt.Println(err)
+		usage()
+	}
 
 	api := new(api)
 	getMatches("http://dailydota2.com/match-api", api)
