@@ -16,7 +16,7 @@ import (
 
 const API_URL = "http://dailydota2.com/match-api"
 
-type payload struct {
+type webhookPayload struct {
 	Content string `json:"content"`
 }
 
@@ -65,21 +65,23 @@ func getMatches(url string) (matches []match, err error) {
 	return
 }
 
-func sendNotification(text string, webhook string) {
-	payload := payload{text}
-	blob, err := json.Marshal(payload)
+func sendNotification(text, webhook string) (err error) {
+	blob, err := json.Marshal(webhookPayload{text})
 	if err != nil {
-		panic(err)
+		return
 	}
+
 	req, err := http.NewRequest("POST", webhook, bytes.NewBuffer(blob))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return
 	}
 	defer resp.Body.Close()
+
+	return
 }
 
 func usage() {
@@ -168,6 +170,10 @@ func main() {
 		// with the stats URL instead
 		url := strings.Replace(match.Link, "match", "stats", 1)
 		notification := fmt.Sprintf("%s vs %s :: %s", team1, team2, url)
-		sendNotification(notification, configuration.Webhook)
+		err = sendNotification(notification, configuration.Webhook)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }
