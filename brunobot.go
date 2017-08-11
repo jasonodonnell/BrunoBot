@@ -14,19 +14,16 @@ import (
 	"time"
 )
 
-// Payload to be sent to discord
 type Payload struct {
 	Content string `json:"content"`
 }
 
-// Config file
 type Configuration struct {
 	Teams     []string
 	Webhook   string
 	Whitelist bool
 }
 
-// JSON Struct to store data from the game api
 type API struct {
 	Matches []struct {
 		Team1 struct {
