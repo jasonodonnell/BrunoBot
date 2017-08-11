@@ -14,17 +14,17 @@ import (
 	"time"
 )
 
-type Payload struct {
+type payload struct {
 	Content string `json:"content"`
 }
 
-type Configuration struct {
+type configuration struct {
 	Teams     []string
 	Webhook   string
 	Whitelist bool
 }
 
-type API struct {
+type api struct {
 	Matches []struct {
 		Team1 struct {
 			TeamName string `json:"team_name"`
@@ -52,7 +52,7 @@ func getMatches(url string, target interface{}) error {
 }
 
 func sendNotification(text string, webhook string) {
-	payload := Payload{text}
+	payload := payload{text}
 	blob, err := json.Marshal(payload)
 	if err != nil {
 		panic(err)
@@ -86,7 +86,7 @@ func whitelisted(team1 string, team2 string, whitelist []string) bool {
 }
 
 // Webhook must be set in configuration
-func loadConfiguration(path string, config *Configuration) {
+func loadConfiguration(path string, config *configuration) {
 	file, err := os.Open(path)
 	if err != nil {
 		fmt.Println("Configuration file not found.. exiting")
@@ -112,10 +112,10 @@ func main() {
 		fmt.Println("Configuration file not found.. exiting")
 		usage()
 	}
-	configuration := &Configuration{}
+	configuration := &configuration{}
 	loadConfiguration(*configFile, configuration)
 
-	api := new(API)
+	api := new(api)
 	getMatches("http://dailydota2.com/match-api", api)
 	if len(api.Matches) != 0 {
 		for _, match := range api.Matches {
