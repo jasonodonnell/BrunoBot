@@ -1,5 +1,7 @@
 # Bruno Bot
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/jasonodonnell/brunobot)](https://goreportcard.com/report/github.com/jasonodonnell/brunobot)
+
 Bruno Bot generates Discord notifications when pro Dota 2 games are being played.  
 It can be configured to notify on any professional game or only teams on a whitelist.
 
