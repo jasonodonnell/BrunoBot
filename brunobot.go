@@ -143,28 +143,31 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(matches) != 0 {
-		for _, match := range matches {
-			team1 := match.Team1.TeamName
-			team2 := match.Team2.TeamName
-			send := false
+	// check if any matches were returned
+	if len(matches) == 0 {
+		return
+	}
 
-			if configuration.Whitelist {
-				send = whitelisted(team1, team2, configuration.Teams)
-			} else {
-				send = true
-			}
+	for _, match := range matches {
+		team1 := match.Team1.TeamName
+		team2 := match.Team2.TeamName
 
-			// Prevent multiple notifications by checking time difference
-			startTime, _ := strconv.Atoi(match.StarttimeUnix)
-			delta := time.Now().Unix() - int64(startTime)
-			if send && delta <= 60 {
-				// Link points to stream but the stats page is nicer, so replace
-				// with the stats URL instead
-				url := strings.Replace(match.Link, "match", "stats", 1)
-				notification := fmt.Sprintf("%s vs %s :: %s", team1, team2, url)
-				sendNotification(notification, configuration.Webhook)
-			}
+		// check if the team makes the cut
+		if configuration.Whitelist && !whitelisted(team1, team2, configuration.Teams) {
+			continue
 		}
+
+		// Prevent multiple notifications by checking time difference
+		startTime, _ := strconv.Atoi(match.StarttimeUnix)
+		delta := time.Now().Unix() - int64(startTime)
+		if delta > 60 {
+			continue
+		}
+
+		// Link points to stream but the stats page is nicer, so replace
+		// with the stats URL instead
+		url := strings.Replace(match.Link, "match", "stats", 1)
+		notification := fmt.Sprintf("%s vs %s :: %s", team1, team2, url)
+		sendNotification(notification, configuration.Webhook)
 	}
 }
