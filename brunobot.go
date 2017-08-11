@@ -7,10 +7,11 @@ import (
     "encoding/json"
     "flag"
     "fmt"
-    "io/ioutil"
     "net/http"
     "os"
+    "strconv"
     "strings"
+    "time"
 )
 
 // Payload to be sent to discord
@@ -20,7 +21,6 @@ type Payload struct {
 
 // Config file
 type Configuration struct {
-    Path      string
     Teams     []string
     Webhook   string
     Whitelist bool
@@ -108,32 +108,8 @@ func loadConfiguration(path string, config *Configuration) {
     }
 }
 
-func storeURL(path, text string) error {
-    f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-    if err != nil {
-        return err
-    }
-    defer f.Close()
-
-    _, err = f.WriteString(text)
-    if err != nil {
-        return err
-    }
-    return nil
-}
-
-func checkURL(path, text string) bool {
-    urls, err := ioutil.ReadFile(path)
-    if err != nil {
-        panic(err)
-    }
-
-    s := string(urls)
-    return strings.Contains(s, text)
-}
-
 func main() {
-configFile := flag.String("config", "", "Configuration file")
+    configFile := flag.String("config", "", "Configuration file")
     flag.Parse()
     if *configFile == "" {
         fmt.Println("Configuration file not found.. exiting")
@@ -148,24 +124,23 @@ configFile := flag.String("config", "", "Configuration file")
         for _, match := range api.Matches {
             team1 := match.Team1.TeamName
             team2 := match.Team2.TeamName
-            send := false
+            send := false 
 
             if configuration.Whitelist {
                 send = whitelisted(team1, team2, configuration.Teams)
             } else {
                 send = true
             }
-            notified := checkURL(configuration.Path, match.Link)
-            fmt.Println(notified, configuration.Path, match.Link)
-
-            if send && ! notified {
+            
+            // Prevent multiple notifications by checking time difference
+            startTime, _ := strconv.Atoi(match.StarttimeUnix)
+            delta := time.Now().Unix() - int64(startTime)
+            if send && delta <= 60 {
                 // Link points to stream but the stats page is nicer, so replace
                 // with the stats URL instead
                 url := strings.Replace(match.Link, "match", "stats", 1)
                 notification := fmt.Sprintf("%s vs %s :: %s", team1, team2, url)
                 sendNotification(notification, configuration.Webhook)
-                link := fmt.Sprintf("%s\n", match.Link)
-                storeURL(configuration.Path, link)
             }
         }
     }
