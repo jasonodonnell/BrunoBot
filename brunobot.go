@@ -14,7 +14,9 @@ import (
 	"time"
 )
 
-type payload struct {
+const API_URL = "http://dailydota2.com/match-api"
+
+type webhookPayload struct {
 	Content string `json:"content"`
 }
 
@@ -24,48 +26,62 @@ type configuration struct {
 	Whitelist bool
 }
 
-type api struct {
-	Matches []struct {
-		Team1 struct {
-			TeamName string `json:"team_name"`
-		} `json:"team1"`
-		Link          string `json:"link"`
-		StarttimeUnix string `json:"starttime_unix"`
-		Team2         struct {
-			TeamName string `json:"team_name"`
-		} `json:"team2"`
-	} `json:"matches"`
+type apiResponse struct {
+	Matches   []match `json:"matches"`
+	Timestamp int     `json:"timestamp"`
 }
 
-func getMatches(url string, target interface{}) error {
+type match struct {
+	Team1 struct {
+		TeamName string `json:"team_name"`
+	} `json:"team1"`
+	Team2 struct {
+		TeamName string `json:"team_name"`
+	} `json:"team2"`
+	Link          string `json:"link"`
+	StarttimeUnix string `json:"starttime_unix"`
+}
+
+func getMatches(url string) (matches []match, err error) {
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return
 	}
 	defer resp.Body.Close()
 
-	return json.NewDecoder(resp.Body).Decode(target)
+	var r apiResponse
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&r)
+	if err != nil {
+		return
+	}
+
+	matches = r.Matches
+
+	return
 }
 
-func sendNotification(text string, webhook string) {
-	payload := payload{text}
-	blob, err := json.Marshal(payload)
+func sendNotification(text, webhook string) (err error) {
+	blob, err := json.Marshal(webhookPayload{text})
 	if err != nil {
-		panic(err)
+		return
 	}
+
 	req, err := http.NewRequest("POST", webhook, bytes.NewBuffer(blob))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return
 	}
 	defer resp.Body.Close()
+
+	return
 }
 
 func usage() {
@@ -86,23 +102,25 @@ func whitelisted(team1 string, team2 string, whitelist []string) bool {
 }
 
 // Webhook must be set in configuration
-func loadConfiguration(path string, config *configuration) {
+func parseConfiguration(path string) (config configuration, err error) {
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Println("Configuration file not found.. exiting")
-		usage()
+		return
 	}
-	decoder := json.NewDecoder(file)
+	defer file.Close()
 
-	err = decoder.Decode(config)
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&config)
 	if err != nil {
-		panic(err)
+		return
 	}
 
 	if config.Webhook == "" {
-		fmt.Println("Webhook is not set.. exiting")
-		usage()
+		err = fmt.Errorf("Webhook is not set")
+		return
 	}
+
+	return
 }
 
 func main() {
@@ -112,33 +130,50 @@ func main() {
 		fmt.Println("Configuration file not found.. exiting")
 		usage()
 	}
-	configuration := &configuration{}
-	loadConfiguration(*configFile, configuration)
 
-	api := new(api)
-	getMatches("http://dailydota2.com/match-api", api)
-	if len(api.Matches) != 0 {
-		for _, match := range api.Matches {
-			team1 := match.Team1.TeamName
-			team2 := match.Team2.TeamName
-			send := false
+	// parse configuration
+	configuration, err := parseConfiguration(*configFile)
+	if err != nil {
+		fmt.Println(err)
+		usage()
+	}
 
-			if configuration.Whitelist {
-				send = whitelisted(team1, team2, configuration.Teams)
-			} else {
-				send = true
-			}
+	// get current matches
+	matches, err := getMatches(API_URL)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-			// Prevent multiple notifications by checking time difference
-			startTime, _ := strconv.Atoi(match.StarttimeUnix)
-			delta := time.Now().Unix() - int64(startTime)
-			if send && delta <= 60 {
-				// Link points to stream but the stats page is nicer, so replace
-				// with the stats URL instead
-				url := strings.Replace(match.Link, "match", "stats", 1)
-				notification := fmt.Sprintf("%s vs %s :: %s", team1, team2, url)
-				sendNotification(notification, configuration.Webhook)
-			}
+	// check if any matches were returned
+	if len(matches) == 0 {
+		return
+	}
+
+	for _, match := range matches {
+		team1 := match.Team1.TeamName
+		team2 := match.Team2.TeamName
+
+		// check if the team makes the cut
+		if configuration.Whitelist && !whitelisted(team1, team2, configuration.Teams) {
+			continue
+		}
+
+		// Prevent multiple notifications by checking time difference
+		startTime, _ := strconv.Atoi(match.StarttimeUnix)
+		delta := time.Now().Unix() - int64(startTime)
+		if delta > 60 {
+			continue
+		}
+
+		// Link points to stream but the stats page is nicer, so replace
+		// with the stats URL instead
+		url := strings.Replace(match.Link, "match", "stats", 1)
+		notification := fmt.Sprintf("%s vs %s :: %s", team1, team2, url)
+		err = sendNotification(notification, configuration.Webhook)
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
 	}
 }
