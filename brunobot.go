@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const API_URL = "http://dailydota2.com/match-api"
+
 type payload struct {
 	Content string `json:"content"`
 }
@@ -24,31 +26,43 @@ type configuration struct {
 	Whitelist bool
 }
 
-type api struct {
-	Matches []struct {
-		Team1 struct {
-			TeamName string `json:"team_name"`
-		} `json:"team1"`
-		Link          string `json:"link"`
-		StarttimeUnix string `json:"starttime_unix"`
-		Team2         struct {
-			TeamName string `json:"team_name"`
-		} `json:"team2"`
-	} `json:"matches"`
+type apiResponse struct {
+	Matches   []match `json:"matches"`
+	Timestamp int     `json:"timestamp"`
 }
 
-func getMatches(url string, target interface{}) error {
+type match struct {
+	Team1 struct {
+		TeamName string `json:"team_name"`
+	} `json:"team1"`
+	Team2 struct {
+		TeamName string `json:"team_name"`
+	} `json:"team2"`
+	Link          string `json:"link"`
+	StarttimeUnix string `json:"starttime_unix"`
+}
+
+func getMatches(url string) (matches []match, err error) {
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return
 	}
 	defer resp.Body.Close()
 
-	return json.NewDecoder(resp.Body).Decode(target)
+	var r apiResponse
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&r)
+	if err != nil {
+		return
+	}
+
+	matches = r.Matches
+
+	return
 }
 
 func sendNotification(text string, webhook string) {
@@ -122,10 +136,15 @@ func main() {
 		usage()
 	}
 
-	api := new(api)
-	getMatches("http://dailydota2.com/match-api", api)
-	if len(api.Matches) != 0 {
-		for _, match := range api.Matches {
+	// get current matches
+	matches, err := getMatches(API_URL)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if len(matches) != 0 {
+		for _, match := range matches {
 			team1 := match.Team1.TeamName
 			team2 := match.Team2.TeamName
 			send := false
