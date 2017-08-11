@@ -3,6 +3,8 @@
 Bruno Bot generates Discord notifications when pro Dota 2 games are being played.  
 It can be configured to notify on any professional game or only teams on a whitelist.
 
+**Note**: This will only alert for the first game in a series.
+
 Built using: `Go 1.7.5`
 
 ## Installing
