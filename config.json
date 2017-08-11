@@ -1,18 +1,18 @@
 {
-    "Teams":[
-      "Digital Chaos",
-      "Evil Geniuses",
-      "LGD-GAMING",
-      "LGD.Forever Young",
-      "Natus Vincere",
-      "Newbee",
-      "OG Dota2",
-      "Team Empire",
-      "Team Liquid",
-      "Team NP",
-      "Team Secret",
-      "Virtus.pro"
-    ],
-    "Webhook": "<DISCORD WEBHOOK HERE>",
-    "Whitelist": true
+	"Teams":[
+		"Digital Chaos",
+		"Evil Geniuses",
+		"LGD-GAMING",
+		"LGD.Forever Young",
+		"Natus Vincere",
+		"Newbee",
+		"OG Dota2",
+		"Team Empire",
+		"Team Liquid",
+		"Team NP",
+		"Team Secret",
+		"Virtus.pro"
+	],
+	"Webhook": "<DISCORD WEBHOOK HERE>",
+	"Whitelist": true
 }
