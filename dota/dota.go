@@ -3,8 +3,8 @@ package dota
 import (
 	"errors"
 	"net/http"
-	"sort"
 	"strings"
+	"time"
 
 	opendota "github.com/jasonodonnell/go-opendota"
 )
@@ -43,38 +43,36 @@ func (d Dota) GetMatches() ([]Match, error) {
 	}
 
 	for _, game := range games {
-		if game.GameTime > 60 {
+		now := time.Now().Unix()
+		if (now - game.ActivateTime) > 60 {
 			continue
 		}
 
-		teams := make(map[string]int)
-		for _, player := range game.Players {
-			if _, ok := d.teams[player.TeamID]; ok {
-				teams[player.TeamName]++
+		if _, ok := d.teams[game.RadiantTeamID]; !ok {
+			if _, ok := d.teams[game.DireTeamID]; !ok {
+				continue
 			}
 		}
-		pairs := sortMap(teams)
 
-		if len(pairs) >= 2 && pairs[0].Value >= 5 {
-			var match Match
-			leagues, _, err := d.client.LeagueService.Leagues()
-			if err != nil {
-				return nil, err
-			}
+		var match Match
+		leagues, _, err := d.client.LeagueService.Leagues()
+		if err != nil {
+			return nil, err
+		}
 
-			for _, league := range leagues {
-				if league.LeagueID == game.LeagueID {
-					match.League = league.Name
-					if match.League == "" {
-						match.League = "Unknown League"
-					}
+		for _, league := range leagues {
+			if league.LeagueID == game.LeagueID {
+				match.League = league.Name
+				if match.League == "" {
+					match.League = "Unknown League"
 				}
+				break
 			}
-
-			match.Radiant = pairs[0].Key
-			match.Dire = pairs[1].Key
-			results = append(results, match)
 		}
+
+		match.Radiant = game.RadiantTeamName
+		match.Dire = game.DireTeamName
+		results = append(results, match)
 	}
 	return results, nil
 }
@@ -100,25 +98,3 @@ func lookupTeam(name string, whitelist []string) bool {
 	}
 	return false
 }
-
-func sortMap(teams map[string]int) PairList {
-	pl := make(PairList, len(teams))
-	i := 0
-	for k, v := range teams {
-		pl[i] = Pair{k, v}
-		i++
-	}
-	sort.Sort(sort.Reverse(pl))
-	return pl
-}
-
-type Pair struct {
-	Key   string
-	Value int
-}
-
-type PairList []Pair
-
-func (p PairList) Len() int           { return len(p) }
-func (p PairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
-func (p PairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }

@@ -23,7 +23,7 @@
   branch = "master"
   name = "github.com/jasonodonnell/go-opendota"
   packages = ["."]
-  revision = "f59a4b17c968d52a6c054120282bb38627d6b416"
+  revision = "cb950f7651aa7f402d9192a7bc28aeb8d0de762d"
 
 [[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
