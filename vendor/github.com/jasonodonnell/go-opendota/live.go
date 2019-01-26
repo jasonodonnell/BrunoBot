@@ -22,7 +22,7 @@ type LiveGame struct {
 	ActivateTime   int           `json:"activate_time"`
 	DeactivateTime int           `json:"deactivate_time"`
 	ServerSteamID  int           `json:"server_steam_id"`
-	LobbyID        string        `json:"lobby_id"`
+	LobbyID        int           `json:"lobby_id"`
 	LeagueID       int           `json:"league_id"`
 	LobbyType      int           `json:"lobby_type"`
 	GameTime       int           `json:"game_time"`

@@ -17,7 +17,7 @@
   branch = "newbruno"
   name = "github.com/jasonodonnell/brunobot"
   packages = ["dota"]
-  revision = "0b273dcef31866c2ec031356ac3c32d851632941"
+  revision = "21dbd41b36fffe8d21dad251e502a7c0a7f62dad"
 
 [[projects]]
   branch = "master"
