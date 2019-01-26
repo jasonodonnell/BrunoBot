@@ -56,7 +56,7 @@ func main() {
 
 	configuration, err := parseConfiguration(*configFile)
 	if err != nil {
-		log.Error("Error reading configuration file: %s", err)
+		log.Errorf("Error reading configuration file: %s", err)
 		usage()
 	}
 
