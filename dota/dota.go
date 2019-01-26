@@ -18,6 +18,7 @@ type Match struct {
 	Radiant string
 	Dire    string
 	League  string
+	MatchID int64
 }
 
 func New(teams []string, httpClient *http.Client) (*Dota, error) {
@@ -72,6 +73,7 @@ func (d Dota) GetMatches() ([]Match, error) {
 
 		match.Radiant = game.RadiantTeamName
 		match.Dire = game.DireTeamName
+		match.MatchID = game.MatchID
 		results = append(results, match)
 	}
 	return results, nil
