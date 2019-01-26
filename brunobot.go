@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/jasonodonnell/BrunoBot/discord"
-	"github.com/jasonodonnell/brunobot/dota"
+	"github.com/jasonodonnell/BrunoBot/dota"
 )
 
 type configuration struct {

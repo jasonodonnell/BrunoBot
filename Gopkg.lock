@@ -14,10 +14,10 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "newbruno"
+  branch = "master"
   name = "github.com/jasonodonnell/brunobot"
   packages = ["dota"]
-  revision = "21dbd41b36fffe8d21dad251e502a7c0a7f62dad"
+  revision = "137254033d8f8eaa032440491d68a0ac7580416a"
 
 [[projects]]
   branch = "master"
@@ -52,6 +52,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "70cffd261537aaf3ef2c956436070a55c6795669b1b60c9803db5975acb34aa0"
+  inputs-digest = "e80be6a0681e0511aecd4465dbde77c65d71427228503612998b22265de09461"
   solver-name = "gps-cdcl"
   solver-version = 1

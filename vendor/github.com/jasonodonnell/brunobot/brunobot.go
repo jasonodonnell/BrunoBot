@@ -72,7 +72,8 @@ func main() {
 	}
 
 	for _, match := range matches {
-		notification := fmt.Sprintf("%s: %s vs %s", match.League, match.Radiant, match.Dire)
+		format := "%s: %s vs %s :: Post Game Results - https://www.opendota.com/matches/%d"
+		notification := fmt.Sprintf(format, match.League, match.Radiant, match.Dire, match.MatchID)
 		if err := discord.Send(notification, configuration.Webhook); err != nil {
 			log.Fatal(err)
 		}

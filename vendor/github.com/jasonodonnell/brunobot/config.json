@@ -1,18 +1,21 @@
 {
 	"Teams":[
-		"Digital Chaos",
-		"Evil Geniuses",
-		"LGD-GAMING",
-		"LGD.Forever Young",
-		"Natus Vincere",
-		"Newbee",
-		"OG Dota2",
-		"Team Empire",
-		"Team Liquid",
-		"Team NP",
-		"Team Secret",
-		"Virtus.pro"
+        "Alliance",
+        "Chaos Esports Club",
+        "EHOME",
+        "Evil Geniuses",
+        "Fnatic",
+        "Forward Gaming",
+        "J.Storm",
+        "Ninjas in Pyjamas",
+        "OG",
+        "PSG.LGD",
+        "TNC Predator",
+        "Team Aster",
+        "Team Liquid",
+        "Team Secret",
+        "Vici Gaming",
+        "Virtus.pro"
 	],
-	"Webhook": "<DISCORD WEBHOOK HERE>",
-	"Whitelist": true
+	"Webhook": "<DISCORD WEBHOOK HERE>"
 }

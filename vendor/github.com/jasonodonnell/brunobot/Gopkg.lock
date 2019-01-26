@@ -17,13 +17,13 @@
   branch = "newbruno"
   name = "github.com/jasonodonnell/brunobot"
   packages = ["dota"]
-  revision = "0b273dcef31866c2ec031356ac3c32d851632941"
+  revision = "21dbd41b36fffe8d21dad251e502a7c0a7f62dad"
 
 [[projects]]
   branch = "master"
   name = "github.com/jasonodonnell/go-opendota"
   packages = ["."]
-  revision = "f59a4b17c968d52a6c054120282bb38627d6b416"
+  revision = "cb950f7651aa7f402d9192a7bc28aeb8d0de762d"
 
 [[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
@@ -52,6 +52,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e1f16be12b2f35ed500b0f82037b05ac942126296f259e4e58c2462731dd2902"
+  inputs-digest = "70cffd261537aaf3ef2c956436070a55c6795669b1b60c9803db5975acb34aa0"
   solver-name = "gps-cdcl"
   solver-version = 1
