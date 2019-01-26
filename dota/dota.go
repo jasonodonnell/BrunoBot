@@ -65,6 +65,9 @@ func (d Dota) GetMatches() ([]Match, error) {
 			for _, league := range leagues {
 				if league.LeagueID == game.LeagueID {
 					match.League = league.Name
+					if match.League == "" {
+						match.League = "Unknown League"
+					}
 				}
 			}
 
